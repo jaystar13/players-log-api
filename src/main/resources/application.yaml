@@ -1,0 +1,67 @@
+spring:
+  application:
+    name: players-log-backend
+
+  # 1. DataSource 설정 (PostgreSQL)
+  datasource:
+    url: jdbc:postgresql://localhost:5434/playerslog
+    username: players
+    password: log
+    driver-class-name: org.postgresql.Driver
+
+  # 2. JPA & Hibernate 설정
+  jpa:
+    hibernate:
+      ddl-auto: update # 개발 단계에서는 update, 운영 시에는 validate/none 추천
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        highlight_sql: true
+        default_batch_fetch_size: 100 # N+1 문제 방지를 위한 최적화
+    open-in-view: false # API 서버 성능 및 커넥션 관리를 위해 false 권장
+
+  # 3. Redis 설정
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  # 4. Spring Boot 4.x & Java 25 핵심: 가상 스레드 활성화
+  threads:
+    virtual:
+      enabled: true
+
+  # 5. OAuth2 Client 설정
+  security:
+    oauth2:
+      client:
+        registration:
+          # ===================================================================
+          # = 예시: Google 설정. 사용할 소셜 플랫폼에 맞게 추가/수정하세요.
+          # = GCP(Google Cloud Platform)에서 발급받은 ID와 Secret을 입력해야 합니다.
+          # ===================================================================
+          google:
+            client-id: "[여기에 Google Client ID를 입력하세요]"
+            client-secret: "[여기에 Google Client Secret을 입력하세요]"
+            scope:
+              - profile
+              - email
+  mvc:
+    servlet:
+      path: /api/v1
+
+# 로깅 설정
+logging:
+  level:
+    root: INFO
+    com.playerslog.backend: DEBUG # 우리 코드의 로그는 상세히
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE # SQL 파라미터 확인용
+
+jwt:
+  secret: a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8
+
+oauth2:
+  success-redirect-uri: http://localhost:3000/login/success
+  failure-redirect-uri: http://localhost:3000/login/failure

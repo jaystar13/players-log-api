@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: players-log-db
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_USER: players
+      POSTGRES_PASSWORD: log
+      POSTGRES_DB: playerslog
+
+  redis:
+    image: redis:7-alpine
+    container_name: players-log-redis
+    ports:
+      - "6379:6379"
