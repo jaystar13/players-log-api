@@ -1,7 +1,9 @@
 package com.playerslog.backend.global.auth;
 
 import com.playerslog.backend.global.auth.userinfo.Oauth2UserInfo;
+import com.playerslog.backend.global.config.properties.JwtProperties;
 import com.playerslog.backend.global.config.properties.Oauth2Properties;
+import com.playerslog.backend.global.util.CookieUtils;
 import com.playerslog.backend.member.entity.Member;
 import com.playerslog.backend.member.entity.SocialProvider;
 import com.playerslog.backend.member.service.MemberService;
@@ -23,9 +25,13 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
+    public static final String REFRESH_TOKEN_COOKIE_NAME = "refresh_token";
+
     private final MemberService memberService;
     private final JwtProvider jwtProvider;
     private final Oauth2Properties oauth2Properties;
+    private final JwtProperties jwtProperties;
+
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -39,10 +45,18 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         Member member = memberService.processOAuth2User(provider, userInfo);
 
-        String token = jwtProvider.createToken(member.getId(), member.getRole().name());
+        String accessToken = jwtProvider.createAccessToken(member.getId(), member.getRole().name());
+        String refreshToken = jwtProvider.createRefreshToken(member.getId());
+
+        CookieUtils.addCookie(
+                response,
+                REFRESH_TOKEN_COOKIE_NAME,
+                refreshToken,
+                (int) (jwtProperties.getRefreshTokenExpiration() / 1000)
+        );
 
         String targetUrl = UriComponentsBuilder.fromUriString(oauth2Properties.getSuccessRedirectUri())
-                .fragment("token=" + token)
+                .fragment("token=" + accessToken)
                 .build().toUriString();
 
         getRedirectStrategy().sendRedirect(request, response, targetUrl);

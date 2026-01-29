@@ -1,47 +1,64 @@
 package com.playerslog.backend.global.auth;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.UnsupportedJwtException;
+import com.playerslog.backend.global.config.properties.JwtProperties;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import javax.crypto.SecretKey;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import java.util.UUID;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class JwtProvider {
-    @Value("${jwt.secret}")
-    private String secretString;
 
-    private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(secretString.getBytes(StandardCharsets.UTF_8));
+    private final JwtProperties jwtProperties;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private SecretKey secretKey;
+
+    @PostConstruct
+    private void init() {
+        this.secretKey = Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8));
     }
 
-    public String createToken(Long memberId, String role) {
+    public String createAccessToken(Long memberId, String role) {
         Date now = new Date();
-        // 10-hour validity
-        long validityInMilliseconds = 3600000L * 10;
-        Date validity = new Date(now.getTime() + validityInMilliseconds);
+        Date validity = new Date(now.getTime() + jwtProperties.getAccessTokenExpiration());
 
         return Jwts.builder()
                 .subject(memberId.toString())
                 .claim("role", role)
                 .issuedAt(now)
                 .expiration(validity)
-                .signWith(getSigningKey())
+                .signWith(secretKey)
                 .compact();
     }
 
+    public String createRefreshToken(Long memberId) {
+        String refreshTokenValue = UUID.randomUUID().toString();
+        long validityInMilliseconds = jwtProperties.getRefreshTokenExpiration();
+
+        RefreshToken refreshToken = RefreshToken.builder()
+                .refreshToken(refreshTokenValue)
+                .memberId(memberId)
+                .expiration(validityInMilliseconds)
+                .build();
+
+        refreshTokenRepository.save(refreshToken);
+        return refreshTokenValue;
+    }
+
+
     public boolean validateToken(String token) {
         try {
-            Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(token);
+            Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token);
             return true;
         } catch (SignatureException | MalformedJwtException e) {
             log.error("Invalid JWT signature: {}", e.getMessage());
@@ -57,7 +74,7 @@ public class JwtProvider {
 
     public Long getMemberIdFromToken(String token) {
         Claims claims = Jwts.parser()
-                .verifyWith(getSigningKey())
+                .verifyWith(secretKey)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();

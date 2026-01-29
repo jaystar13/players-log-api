@@ -67,4 +67,8 @@ public class Member extends BaseTimeEntity {
         this.provider = provider;
         this.providerId = providerId;
     }
+
+    public void updateRole(Role role) {
+        this.role = role;
+    }
 }

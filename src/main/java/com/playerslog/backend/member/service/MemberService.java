@@ -3,6 +3,7 @@ package com.playerslog.backend.member.service;
 import com.playerslog.backend.global.auth.userinfo.Oauth2UserInfo;
 import com.playerslog.backend.member.dto.MemberUpdateDto;
 import com.playerslog.backend.member.entity.Member;
+import com.playerslog.backend.member.entity.Role;
 import com.playerslog.backend.member.entity.SocialProvider;
 import com.playerslog.backend.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,9 +29,10 @@ public class MemberService {
         // 2. 이메일로 회원 조회
         Optional<Member> memberByEmail = memberRepository.findByEmail(userInfo.getEmail());
         if (memberByEmail.isPresent()) {
-            // 3. 기존 회원에 소셜 정보 연동
+            // 3. 기존 회원에 소셜 정보 연동 및 역할 변경
             Member existingMember = memberByEmail.get();
             existingMember.linkSocialAccount(provider, userInfo.getProviderId());
+            existingMember.updateRole(Role.GUEST); // 역할 변경
             return existingMember;
         }
 
@@ -45,6 +47,7 @@ public class MemberService {
                 .profileImageUrl(userInfo.getProfileImageUrl())
                 .provider(provider)
                 .providerId(userInfo.getProviderId())
+                .role(Role.GUEST) // 신규 회원은 GUEST 역할 할당
                 .build();
         return memberRepository.save(member);
     }

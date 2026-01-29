@@ -61,6 +61,8 @@ logging:
 
 jwt:
   secret: a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8a8
+  access-token-expiration: 1800000 # 30분
+  refresh-token-expiration: 604800000 # 7일
 
 oauth2:
   success-redirect-uri: http://localhost:3000/login/success
