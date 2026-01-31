@@ -11,7 +11,9 @@ import org.hibernate.type.SqlTypes;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"provider", "providerId"})
+})
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
@@ -35,7 +37,7 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false)
     private AuthProvider provider;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String providerId;
 
     @Enumerated(EnumType.STRING)
@@ -60,5 +62,10 @@ public class User extends BaseTimeEntity {
     public void updateProfile(String name, String profileImageUrl) {
         this.name = name;
         this.profileImageUrl = profileImageUrl;
+    }
+
+    public void linkSocialAccount(AuthProvider provider, String providerId) {
+        this.provider = provider;
+        this.providerId = providerId;
     }
 }

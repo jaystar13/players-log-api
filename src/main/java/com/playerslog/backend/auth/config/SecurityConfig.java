@@ -50,7 +50,8 @@ public class SecurityConfig {
                                 "/favicon.ico",
                                 "/oauth2/**",
                                 "/login/**",
-                                "/auth/refresh"
+                                "/auth/refresh",
+                                "/auth/token/exchange"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

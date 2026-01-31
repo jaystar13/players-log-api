@@ -30,14 +30,19 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
         OAuth2UserInfo oAuth2UserInfo = getOAuth2UserInfo(registrationId, oAuth2User.getAttributes());
 
-        User user = userRepository.findByProviderAndProviderId(
-                oAuth2UserInfo.getProvider(),
-                oAuth2UserInfo.getId()
-        ).orElseGet(() -> registerNewUser(oAuth2UserInfo));
+        User user = userRepository.findByEmail(oAuth2UserInfo.getEmail())
+                .map(existingUser -> {
+                    // 기존 사용자가 있으면, 새 소셜 로그인 정보로 업데이트 (계정 연결)
+                    log.info("Existing user found with email {}. Linking new provider {}.", existingUser.getEmail(), oAuth2UserInfo.getProvider());
+                    existingUser.linkSocialAccount(oAuth2UserInfo.getProvider(), oAuth2UserInfo.getId());
+                    return existingUser;
+                })
+                .orElseGet(() -> registerNewUser(oAuth2UserInfo)); // 새 사용자인 경우 등록
 
         // 사용자 정보 업데이트 (이름, 프로필 이미지 변경 가능)
         user.updateProfile(oAuth2UserInfo.getName(), oAuth2UserInfo.getImageUrl());
-        userRepository.save(user);
+        // userRepository.save(user)는 registerNewUser에서 처리되거나, 
+        // 기존 유저인 경우 dirty-checking에 의해 트랜잭션 커밋 시 자동 업데이트 됩니다.
 
         return UserPrincipal.create(user, oAuth2User.getAttributes());
     }

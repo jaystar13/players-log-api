@@ -4,6 +4,7 @@ import com.playerslog.backend.auth.domain.User;
 import com.playerslog.backend.auth.repository.UserRepository;
 import com.playerslog.backend.auth.security.UserPrincipal;
 import com.playerslog.backend.auth.security.jwt.JwtTokenProvider;
+import com.playerslog.backend.auth.service.AuthorizationCodeService;
 import com.playerslog.backend.auth.service.RefreshTokenService;
 import com.playerslog.backend.global.config.properties.AppProperties;
 import jakarta.servlet.http.Cookie;
@@ -27,6 +28,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private final JwtTokenProvider tokenProvider;
     private final AppProperties appProperties;
     private final RefreshTokenService refreshTokenService;
+    private final AuthorizationCodeService authorizationCodeService; // 의존성 추가
     private final UserRepository userRepository;
     private final HttpCookieOAuth2AuthorizationRequestRepository cookieRepository;
     private final CookieUtil cookieUtil;
@@ -73,18 +75,18 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         String refreshToken = tokenProvider.createRefreshToken(user.getId());
 
-        // RefreshToken을 Redis에 저장
+        // RefreshToken을 Redis에 저장하고 쿠키에 담기
         refreshTokenService.saveRefreshToken(user.getId(), refreshToken);
-
-        // HttpOnly 쿠키에 토큰 저장
-        cookieUtil.addAccessTokenCookie(response, accessToken);
         cookieUtil.addRefreshTokenCookie(response, refreshToken);
+
+        // AccessToken에 대한 임시 코드 생성 및 Redis에 저장
+        String code = authorizationCodeService.generateAndStoreCode(accessToken);
 
         log.info("OAuth2 login success: userId={}, provider={}", user.getId(), user.getProvider());
 
-        // 리다이렉트 (Access Token을 URL에 포함)
+        // 리다이렉트 (임시 코드를 URL에 포함)
         return UriComponentsBuilder.fromUriString(redirectUri)
-                .queryParam("token", accessToken) // Access Token을 URL 쿼리 파라미터로 추가
+                .queryParam("code", code) // 임시 코드를 URL 쿼리 파라미터로 추가
                 .build().toUriString();
     }
 
