@@ -1,6 +1,6 @@
 package com.playerslog.backend.member.dto;
 
-import com.playerslog.backend.member.entity.SocialLinks;
+import com.playerslog.backend.auth.domain.SocialLinks;
 import jakarta.validation.constraints.Size;
 
 public record MemberUpdateDto(

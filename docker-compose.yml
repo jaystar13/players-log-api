@@ -14,3 +14,10 @@ services:
     container_name: players-log-redis
     ports:
       - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+
+volumes:
+  redis-data:

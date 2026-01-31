@@ -1,7 +1,7 @@
 package com.playerslog.backend.member.dto;
 
+import com.playerslog.backend.auth.domain.SocialLinks;
 import com.playerslog.backend.member.entity.Member;
-import com.playerslog.backend.member.entity.SocialLinks;
 
 public record MemberProfileResponse(
         Long id,

@@ -1,11 +1,12 @@
-package com.playerslog.backend.member.entity;
+package com.playerslog.backend.auth.domain;
 
-import java.util.Collection;
-import java.util.Collections;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+import java.util.Collection;
+import java.util.Collections;
 
 @Getter
 @RequiredArgsConstructor

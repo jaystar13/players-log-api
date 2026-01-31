@@ -1,5 +1,8 @@
 package com.playerslog.backend.member.entity;
 
+import com.playerslog.backend.auth.domain.AuthProvider;
+import com.playerslog.backend.auth.domain.Role;
+import com.playerslog.backend.auth.domain.SocialLinks;
 import com.playerslog.backend.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -28,7 +31,7 @@ public class Member extends BaseTimeEntity {
     private String description;
 
     @Enumerated(EnumType.STRING)
-    private SocialProvider provider;
+    private AuthProvider provider;
 
     private String providerId;
 
@@ -46,7 +49,7 @@ public class Member extends BaseTimeEntity {
 
     @Builder
     public Member(String email, String nickname, String profileImageUrl,
-                  String description, SocialProvider provider, String providerId, Role role) {
+                  String description, AuthProvider provider, String providerId, Role role) {
         this.email = email;
         this.nickname = nickname;
         this.profileImageUrl = profileImageUrl;
@@ -63,7 +66,7 @@ public class Member extends BaseTimeEntity {
         this.socialLinks = socialLinks;
     }
 
-    public void linkSocialAccount(SocialProvider provider, String providerId) {
+    public void linkSocialAccount(AuthProvider provider, String providerId) {
         this.provider = provider;
         this.providerId = providerId;
     }

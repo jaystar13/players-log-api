@@ -1,25 +1,17 @@
 package com.playerslog.backend.member.service;
 
-import com.playerslog.backend.global.auth.userinfo.Oauth2UserInfo;
-import com.playerslog.backend.member.dto.MemberUpdateDto;
-import com.playerslog.backend.member.entity.Member;
-import com.playerslog.backend.member.entity.Role;
-import com.playerslog.backend.member.entity.SocialProvider;
-import com.playerslog.backend.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class MemberService {
-
+/*
     private final MemberRepository memberRepository;
 
-    public Member processOAuth2User(SocialProvider provider, Oauth2UserInfo userInfo) {
+    public Member processOAuth2User(AuthProvider provider, OAuth2UserInfo userInfo) {
         // 1. 소셜 정보로 회원 조회
         Optional<Member> memberOptional = memberRepository.findByProviderAndProviderId(provider, userInfo.getProviderId());
         if (memberOptional.isPresent()) {
@@ -40,7 +32,7 @@ public class MemberService {
         return createMember(provider, userInfo);
     }
 
-    private Member createMember(SocialProvider provider, Oauth2UserInfo userInfo) {
+    private Member createMember(AuthProvider provider, Oauth2UserInfo userInfo) {
         Member member = Member.builder()
                 .email(userInfo.getEmail())
                 .nickname(userInfo.getNickname())
@@ -54,5 +46,5 @@ public class MemberService {
 
     public void updateMyProfile(Member member, MemberUpdateDto dto) {
         member.updateProfile(dto.nickname(), dto.description(), dto.socialLinks());
-    }
+    }*/
 }
