@@ -1,10 +1,10 @@
 package com.playerslog.backend.auth.controller;
 
-import com.playerslog.backend.auth.domain.User;
 import com.playerslog.backend.auth.dto.AuthResponse;
 import com.playerslog.backend.auth.dto.TokenExchangeRequest;
 import com.playerslog.backend.auth.service.AuthService;
 import com.playerslog.backend.auth.service.AuthorizationCodeService;
+import com.playerslog.backend.user.domain.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

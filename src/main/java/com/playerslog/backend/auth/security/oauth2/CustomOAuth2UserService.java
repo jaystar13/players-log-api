@@ -1,9 +1,9 @@
 package com.playerslog.backend.auth.security.oauth2;
 
 import com.playerslog.backend.auth.domain.Role;
-import com.playerslog.backend.auth.domain.User;
-import com.playerslog.backend.auth.repository.UserRepository;
 import com.playerslog.backend.auth.security.UserPrincipal;
+import com.playerslog.backend.user.domain.User;
+import com.playerslog.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;

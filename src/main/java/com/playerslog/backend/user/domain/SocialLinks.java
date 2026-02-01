@@ -1,4 +1,4 @@
-package com.playerslog.backend.auth.domain;
+package com.playerslog.backend.user.domain;
 
 public record SocialLinks(
         String instagram,

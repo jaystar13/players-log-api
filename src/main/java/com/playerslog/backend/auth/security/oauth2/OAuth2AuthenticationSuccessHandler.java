@@ -1,12 +1,12 @@
 package com.playerslog.backend.auth.security.oauth2;
 
-import com.playerslog.backend.auth.domain.User;
-import com.playerslog.backend.auth.repository.UserRepository;
 import com.playerslog.backend.auth.security.UserPrincipal;
 import com.playerslog.backend.auth.security.jwt.JwtTokenProvider;
 import com.playerslog.backend.auth.service.AuthorizationCodeService;
 import com.playerslog.backend.auth.service.RefreshTokenService;
 import com.playerslog.backend.global.config.properties.AppProperties;
+import com.playerslog.backend.user.domain.User;
+import com.playerslog.backend.user.repository.UserRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

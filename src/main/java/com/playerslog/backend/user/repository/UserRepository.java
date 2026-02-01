@@ -1,7 +1,7 @@
-package com.playerslog.backend.auth.repository;
+package com.playerslog.backend.user.repository;
 
 import com.playerslog.backend.auth.domain.AuthProvider;
-import com.playerslog.backend.auth.domain.User;
+import com.playerslog.backend.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

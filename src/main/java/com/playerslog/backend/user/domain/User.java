@@ -1,5 +1,7 @@
-package com.playerslog.backend.auth.domain;
+package com.playerslog.backend.user.domain;
 
+import com.playerslog.backend.auth.domain.AuthProvider;
+import com.playerslog.backend.auth.domain.Role;
 import com.playerslog.backend.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -62,6 +64,12 @@ public class User extends BaseTimeEntity {
     public void updateProfile(String name, String profileImageUrl) {
         this.name = name;
         this.profileImageUrl = profileImageUrl;
+    }
+
+    public void updateProfile(String name, String description, SocialLinks socialLinks) {
+        this.name = name;
+        this.description = description;
+        this.socialLinks = socialLinks;
     }
 
     public void linkSocialAccount(AuthProvider provider, String providerId) {

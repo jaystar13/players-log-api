@@ -1,6 +1,6 @@
 package com.playerslog.backend.auth.security;
 
-import com.playerslog.backend.auth.domain.User;
+import com.playerslog.backend.user.domain.User;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
