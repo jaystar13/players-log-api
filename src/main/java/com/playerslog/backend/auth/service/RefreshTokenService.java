@@ -22,14 +22,24 @@ public class RefreshTokenService {
         String tokenKey = REFRESH_TOKEN_PREFIX + refreshToken;
         String userKey = USER_REFRESH_TOKEN_PREFIX + userId;
 
+        // 기존에 해당 유저에게 발급된 토큰이 있다면 삭제
         String existingToken = redisTemplate.opsForValue().get(userKey);
         if (existingToken != null) {
             redisTemplate.delete(REFRESH_TOKEN_PREFIX + existingToken);
         }
 
+        // 1. 유저 ID -> 리프레시 토큰 저장
         redisTemplate.opsForValue().set(
                 userKey,
                 refreshToken,
+                REFRESH_TOKEN_VALIDITY_DAYS,
+                TimeUnit.DAYS
+        );
+
+        // 2. 리프레시 토큰 -> 유저 ID 저장 (조회를 위한 역방향 데이터)
+        redisTemplate.opsForValue().set(
+                tokenKey,
+                String.valueOf(userId),
                 REFRESH_TOKEN_VALIDITY_DAYS,
                 TimeUnit.DAYS
         );
