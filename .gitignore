@@ -41,3 +41,23 @@ out/
 .env.local
 .env.dev
 .env.prod
+
+# misc
+.DS_Store
+*.seed
+*.log
+*.pid
+*.bak
+*.swp
+*.swo
+*.tmp
+*.sublime-project
+*.sublime-workspace
+.idea
+.vscode
+
+# OSX
+.DS_Store
+
+# Git
+.gitattributes
