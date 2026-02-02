@@ -25,4 +25,12 @@ public interface GollRepository extends JpaRepository<Goll, Long> {
     Optional<Goll> findByIdWithDetails(Long gollId);
 
     long countByOwnerId(Long ownerId);
+
+    @Query(value = "SELECT g FROM Goll g " +
+            "LEFT JOIN FETCH g.owner " +
+            "LEFT JOIN FETCH g.participants " +
+            "LEFT JOIN FETCH g.previewLinks " +
+            "WHERE g.owner.id = :ownerId",
+            countQuery = "SELECT COUNT(g) FROM Goll g WHERE g.owner.id = :ownerId")
+    Page<Goll> findByOwnerId(Long ownerId, Pageable pageable);
 }

@@ -1,6 +1,7 @@
 package com.playerslog.backend.goll.dto;
 
 import com.playerslog.backend.goll.domain.Goll;
+import com.playerslog.backend.goll.domain.GollStatus;
 import lombok.Builder;
 import lombok.Data;
 
@@ -20,6 +21,7 @@ public class GollSummaryResponse {
     private Set<String> previewLinks;
     private String description;
     private Set<ParticipantResponse> participants;
+    private GollStatus status;
     private long likes;
     private boolean isLiked;
 
@@ -40,6 +42,7 @@ public class GollSummaryResponse {
                 .participants(goll.getParticipants().stream()
                         .map(ParticipantResponse::fromEntity)
                         .collect(Collectors.toSet()))
+                .status(goll.getStatus())
                 .likes(likeCount)
                 .isLiked(isLiked)
                 .build();

@@ -1,15 +1,12 @@
 package com.playerslog.backend.goll.dto.response;
 
 import com.playerslog.backend.goll.domain.Goll;
+import com.playerslog.backend.goll.domain.GollStatus;
 import com.playerslog.backend.goll.domain.Participant;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Builder
@@ -27,9 +24,11 @@ public record GollDetailResponse(
         Set<String> previewLinks,
         long likes,
         boolean isLiked,
-        String userVoteId
+        String userVoteId,
+        GollStatus status,
+        boolean isOwner
 ) {
-    public static GollDetailResponse of(Goll goll, long likeCount, boolean isLiked, Map<Long, Integer> voteCounts, String userVoteId) {
+    public static GollDetailResponse of(Goll goll, long likeCount, boolean isLiked, Map<Long, Integer> voteCounts, String userVoteId, boolean isOwner) {
         List<ParticipantDto> sortedParticipants = goll.getParticipants().stream()
                 .map(p -> ParticipantDto.from(
                         p,
@@ -54,6 +53,8 @@ public record GollDetailResponse(
                 .likes(likeCount)
                 .isLiked(isLiked)
                 .userVoteId(userVoteId)
+                .status(goll.getStatus())
+                .isOwner(isOwner)
                 .build();
     }
 

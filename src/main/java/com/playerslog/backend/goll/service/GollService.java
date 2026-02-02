@@ -72,12 +72,13 @@ public class GollService {
         Goll goll = gollRepository.findByIdWithDetails(gollId)
                 .orElseThrow(() -> new NoSuchElementException("Goll not found with id: " + gollId));
 
+        boolean isOwner = goll.getOwner() != null && goll.getOwner().getId().equals(userId);
         long likeCount = redisService.getGollLikeCount(gollId);
         boolean isLiked = userId != null && redisService.isGollLikedByUser(gollId, String.valueOf(userId));
         Map<Long, Integer> voteCounts = redisService.getParticipantVoteCounts(gollId);
         String userVote = userId != null ? redisService.getUserVoteForGoll(gollId, String.valueOf(userId)) : null;
 
-        return GollDetailResponse.of(goll, likeCount, isLiked, voteCounts, userVote);
+        return GollDetailResponse.of(goll, likeCount, isLiked, voteCounts, userVote, isOwner);
     }
 
     @Transactional
@@ -132,5 +133,23 @@ public class GollService {
         response.put("votedParticipantId", votedParticipantId != null ? Long.parseLong(votedParticipantId) : null);
         response.put("voteCounts", voteCounts);
         return response;
+    }
+
+    @Transactional
+    public GollDetailResponse patchGoll(Long gollId, Long userId, com.playerslog.backend.goll.dto.PatchGollRequest request) {
+        Goll goll = gollRepository.findById(gollId)
+                .orElseThrow(() -> new NoSuchElementException("Goll not found with id: " + gollId));
+
+        if (!goll.getOwner().getId().equals(userId)) {
+            throw new IllegalStateException("User does not have permission to patch this goll.");
+        }
+
+        if (request.getStatus() != null) {
+            goll.setStatus(request.getStatus());
+        }
+
+        gollRepository.save(goll);
+
+        return findGollDetailById(gollId, userId);
     }
 }

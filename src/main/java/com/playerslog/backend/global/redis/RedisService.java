@@ -28,14 +28,21 @@ public class RedisService {
         return "goll:" + gollId + ":user_votes";
     }
 
+    private String getUserLikedGollsKey(String userId) {
+        return "user:" + userId + ":liked_golls";
+    }
+
     // --- Goll Like Operations ---
     public boolean toggleGollLike(Long gollId, String userId) {
-        String key = getGollLikersKey(gollId);
-        if (Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(key, userId))) {
-            redisTemplate.opsForSet().remove(key, userId);
+        String likersKey = getGollLikersKey(gollId);
+        String userLikedKey = getUserLikedGollsKey(userId);
+        if (Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(likersKey, userId))) {
+            redisTemplate.opsForSet().remove(likersKey, userId);
+            redisTemplate.opsForSet().remove(userLikedKey, String.valueOf(gollId));
             return false; // Like removed
         } else {
-            redisTemplate.opsForSet().add(key, userId);
+            redisTemplate.opsForSet().add(likersKey, userId);
+            redisTemplate.opsForSet().add(userLikedKey, String.valueOf(gollId));
             return true; // Like added
         }
     }
@@ -47,6 +54,12 @@ public class RedisService {
 
     public boolean isGollLikedByUser(Long gollId, String userId) {
         return Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(getGollLikersKey(gollId), userId));
+    }
+
+    public Set<String> getLikedGollsForUser(String userId) {
+        String key = getUserLikedGollsKey(userId);
+        Set<String> members = redisTemplate.opsForSet().members(key);
+        return members != null ? members : Set.of();
     }
 
     // --- Participant Vote Operations ---

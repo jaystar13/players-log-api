@@ -36,5 +36,22 @@ public class UserController {
         UserProfileResponse updatedProfile = userService.updateUserProfile(userId, request);
         return ResponseEntity.ok(updatedProfile);
     }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<UserProfileResponse> getUserProfile(@PathVariable Long userId) {
+        UserProfileResponse userProfile = userService.getUserProfile(userId);
+        return ResponseEntity.ok(userProfile);
+    }
+
+    @GetMapping("/{userId}/golls")
+    public ResponseEntity<org.springframework.data.domain.Page<com.playerslog.backend.goll.dto.GollSummaryResponse>> getGollsForUser(
+            @PathVariable Long userId,
+            @RequestParam(name = "type", defaultValue = "created") String type,
+            @org.springframework.data.web.PageableDefault(size = 20, sort = "createdAt,desc") org.springframework.data.domain.Pageable pageable,
+            @AuthenticationPrincipal Long currentUserId
+    ) {
+        org.springframework.data.domain.Page<com.playerslog.backend.goll.dto.GollSummaryResponse> golls = userService.getGollsForUser(userId, type, pageable, currentUserId);
+        return ResponseEntity.ok(golls);
+    }
 }
 

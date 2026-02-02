@@ -54,6 +54,15 @@ public class Goll extends BaseTimeEntity {
     @Column(name = "url")
     private Set<String> previewLinks = new HashSet<>();
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private GollStatus status = GollStatus.ACTIVE;
+
+    public void setStatus(GollStatus status) {
+        this.status = status;
+    }
+
+
     @Builder
     public Goll(String title, String sport, LocalDateTime matchDate, String venue, String description,
                 String matchType, String participantUnit, User owner) {

@@ -70,4 +70,16 @@ public class GollController {
         }
         return ResponseEntity.ok(gollService.toggleGollLike(gollId, userId));
     }
+
+    @PatchMapping("/{gollId}")
+    public ResponseEntity<GollDetailResponse> patchGoll(
+            @PathVariable Long gollId,
+            @AuthenticationPrincipal Long userId,
+            @RequestBody com.playerslog.backend.goll.dto.PatchGollRequest request) {
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        GollDetailResponse updatedGoll = gollService.patchGoll(gollId, userId, request);
+        return ResponseEntity.ok(updatedGoll);
+    }
 }
