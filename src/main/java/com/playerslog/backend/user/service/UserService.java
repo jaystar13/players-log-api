@@ -7,6 +7,7 @@ import com.playerslog.backend.user.domain.User;
 import com.playerslog.backend.user.dto.UpdateProfileRequest;
 import com.playerslog.backend.user.dto.UserProfileResponse;
 import com.playerslog.backend.user.repository.UserRepository;
+import com.playerslog.backend.global.exception.UserNotFoundException; // Import UserNotFoundException
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,7 +30,7 @@ public class UserService {
 
     public UserProfileResponse getUserProfile(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NoSuchElementException("User not found with id: " + userId));
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId)); // Throw custom exception
 
         long createdGollsCount = gollRepository.countByOwnerId(userId);
         long likedGollsCount = redisService.getLikedGollsForUser(String.valueOf(userId)).size();
@@ -47,7 +47,7 @@ public class UserService {
     @Transactional
     public UserProfileResponse updateUserProfile(Long userId, UpdateProfileRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NoSuchElementException("User not found with id: " + userId));
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId)); // Throw custom exception
 
         user.updateProfile(request.name(), request.description(), request.socialLinks());
 

@@ -45,8 +45,8 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/golls/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/users/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/golls/**", "/users/**", "/s/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/short-urls").permitAll()
                         .requestMatchers(
                                 "/",
                                 "/error",
