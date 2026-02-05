@@ -4,7 +4,6 @@ import com.playerslog.backend.auth.dto.AuthResponse;
 import com.playerslog.backend.auth.dto.TokenExchangeRequest;
 import com.playerslog.backend.auth.service.AuthService;
 import com.playerslog.backend.auth.service.AuthorizationCodeService;
-import com.playerslog.backend.user.domain.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +11,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/auth")
@@ -54,20 +56,5 @@ public class AuthController {
                                        HttpServletResponse response) {
         authService.logout(userId, request, response);
         return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/me")
-    public ResponseEntity<AuthResponse.UserInfo> getCurrentUser(@AuthenticationPrincipal Long userId) {
-        User user = authService.getCurrentUser(userId);
-
-        AuthResponse.UserInfo userInfo = AuthResponse.UserInfo.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .name(user.getName())
-                .profileImageUrl(user.getProfileImageUrl())
-                .provider(user.getProvider().name())
-                .build();
-
-        return ResponseEntity.ok(userInfo);
     }
 }

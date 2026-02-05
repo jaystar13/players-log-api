@@ -1,8 +1,8 @@
 package com.playerslog.backend.user.service;
 
+import com.playerslog.backend.global.redis.RedisService;
 import com.playerslog.backend.goll.dto.GollSummaryResponse;
 import com.playerslog.backend.goll.repository.GollRepository;
-import com.playerslog.backend.global.redis.RedisService;
 import com.playerslog.backend.user.domain.User;
 import com.playerslog.backend.user.dto.UpdateProfileRequest;
 import com.playerslog.backend.user.dto.UserProfileResponse;
@@ -34,7 +34,7 @@ public class UserService {
 
         long createdGollsCount = gollRepository.countByOwnerId(userId);
         long likedGollsCount = redisService.getLikedGollsForUser(String.valueOf(userId)).size();
-        
+
         UserProfileResponse.StatsDto stats = UserProfileResponse.StatsDto.builder()
                 .created(createdGollsCount)
                 .liked(likedGollsCount)
@@ -50,7 +50,7 @@ public class UserService {
                 .orElseThrow(() -> new NoSuchElementException("User not found with id: " + userId));
 
         user.updateProfile(request.name(), request.description(), request.socialLinks());
-        
+
         User updatedUser = userRepository.save(user);
 
         return getUserProfile(updatedUser.getId());
@@ -70,12 +70,18 @@ public class UserService {
             // This fetches all liked golls, pagination is not properly applied here on the DB query
             // For a large number of liked golls, this could be inefficient.
             // A possible improvement is to fetch only the IDs for the current page.
-            golls = new PageImpl<>(gollRepository.findAllById(likedGollIds), pageable, likedGollIds.size());
+            golls = new PageImpl<>(gollRepository.findByIdIn(likedGollIds), pageable, likedGollIds.size());
         } else {
             return Page.empty(pageable);
         }
 
         return golls.map(goll -> {
+            // *** MANUAL INITIALIZATION FIX ***
+            // By calling .size(), we force Hibernate to execute the query for these lazy collections
+            // while the transaction is still active.
+            goll.getPreviewLinks().size();
+            goll.getParticipants().size();
+
             long likeCount = redisService.getGollLikeCount(goll.getId());
             boolean isLiked = currentUserId != null && redisService.isGollLikedByUser(goll.getId(), String.valueOf(currentUserId));
             return GollSummaryResponse.fromEntity(goll, likeCount, isLiked);

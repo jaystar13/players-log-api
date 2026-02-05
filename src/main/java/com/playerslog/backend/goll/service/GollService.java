@@ -1,12 +1,15 @@
 package com.playerslog.backend.goll.service;
 
 import com.playerslog.backend.global.redis.RedisService;
+import com.playerslog.backend.global.sse.SseEmitterService;
 import com.playerslog.backend.goll.domain.Goll;
 import com.playerslog.backend.goll.domain.Participant;
 import com.playerslog.backend.goll.dto.CreateGollRequest;
 import com.playerslog.backend.goll.dto.GollSummaryResponse;
+import com.playerslog.backend.goll.dto.LikeUpdateEvent;
 import com.playerslog.backend.goll.dto.UpdateGollRequest;
 import com.playerslog.backend.goll.dto.response.GollDetailResponse;
+import com.playerslog.backend.goll.dto.response.GollSearchResponse;
 import com.playerslog.backend.goll.repository.GollRepository;
 import com.playerslog.backend.user.domain.User;
 import com.playerslog.backend.user.repository.UserRepository;
@@ -15,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -27,7 +31,8 @@ public class GollService {
 
     private final GollRepository gollRepository;
     private final UserRepository userRepository;
-    private final RedisService redisService; // Use RedisService
+    private final RedisService redisService;
+    private final SseEmitterService sseEmitterService;
 
     @Transactional
     public Goll createGoll(CreateGollRequest request, Long userId) {
@@ -57,6 +62,20 @@ public class GollService {
         goll.setPreviewLinks(new HashSet<>(request.previewLinks()));
 
         return gollRepository.save(goll);
+    }
+
+    public Page<GollSearchResponse> searchGolls(String query, String scope, Pageable pageable) {
+        if (!StringUtils.hasText(query)) {
+            return Page.empty();
+        }
+
+        // Currently, only 'title' scope is implemented as per the immediate requirement.
+        if ("title".equalsIgnoreCase(scope)) {
+            return gollRepository.searchByTitleFTS(query, pageable)
+                    .map(GollSearchResponse::from);
+        }
+        
+        return Page.empty();
     }
 
     public Page<GollSummaryResponse> getGolls(Pageable pageable, Long userId) {
@@ -121,6 +140,13 @@ public class GollService {
     public Map<String, Long> toggleGollLike(Long gollId, Long userId) {
         boolean liked = redisService.toggleGollLike(gollId, String.valueOf(userId));
         long newLikeCount = redisService.getGollLikeCount(gollId);
+
+        // Notify subscribers
+        Map<Long, Integer> voteCounts = redisService.getParticipantVoteCounts(gollId);
+        LikeUpdateEvent event = LikeUpdateEvent.gollLikeUpdate(gollId, newLikeCount, voteCounts);
+        sseEmitterService.sendToGollSubscribers(gollId, event.type(), event);
+
+
         return Map.of("likes", newLikeCount, "liked", liked ? 1L : 0L);
     }
 
@@ -128,6 +154,11 @@ public class GollService {
     public Map<String, Object> voteForParticipant(Long gollId, Long participantId, Long userId) {
         String votedParticipantId = redisService.toggleParticipantVote(gollId, String.valueOf(participantId), String.valueOf(userId));
         Map<Long, Integer> voteCounts = redisService.getParticipantVoteCounts(gollId);
+
+        // Notify subscribers
+        long likeCount = redisService.getGollLikeCount(gollId);
+        LikeUpdateEvent event = LikeUpdateEvent.voteUpdate(gollId, likeCount, voteCounts);
+        sseEmitterService.sendToGollSubscribers(gollId, event.type(), event);
 
         Map<String, Object> response = new HashMap<>();
         response.put("votedParticipantId", votedParticipantId != null ? Long.parseLong(votedParticipantId) : null);

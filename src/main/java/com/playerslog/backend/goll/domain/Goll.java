@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -46,9 +47,11 @@ public class Goll extends BaseTimeEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User owner;
 
+    @BatchSize(size = 100)
     @OneToMany(mappedBy = "goll", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Participant> participants = new HashSet<>();
 
+    @BatchSize(size = 100)
     @ElementCollection
     @CollectionTable(name = "goll_preview_links", joinColumns = @JoinColumn(name = "goll_id"))
     @Column(name = "url")
